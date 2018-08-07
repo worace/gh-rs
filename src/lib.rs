@@ -16,39 +16,39 @@ fn debug_float(f: f64) -> () {
     // println!("{:#066b}", longBits);
 }
 
-fn widen(mut low32: u64) -> u64 {
-  low32 |= low32 << 16; low32 &= 0x0000ffff0000ffff;
-  low32 |= low32 << 8;  low32 &= 0x00ff00ff00ff00ff;
-  low32 |= low32 << 4;  low32 &= 0x0f0f0f0f0f0f0f0f;
-  low32 |= low32 << 2;  low32 &= 0x3333333333333333;
-  low32 |= low32 << 1;  low32 &= 0x5555555555555555;
-  low32
+fn widen(mut low_32: u64) -> u64 {
+  low_32 |= low_32 << 16; low_32 &= 0x0000ffff0000ffff;
+  low_32 |= low_32 << 8;  low_32 &= 0x00ff00ff00ff00ff;
+  low_32 |= low_32 << 4;  low_32 &= 0x0f0f0f0f0f0f0f0f;
+  low_32 |= low_32 << 2;  low_32 &= 0x3333333333333333;
+  low_32 |= low_32 << 1;  low_32 &= 0x5555555555555555;
+  low_32
 }
 
 
 const mult: f64 = -(0x80000000 as f64);
 
 pub fn encode(point: Coordinate<f64>) -> u64 {
-    let biasedLon = (point.x + 180.0) / 360.0;
-    let biasedLat = (point.y + 90.0) / 180.0;
-    debug_float(biasedLon);
-    debug_float(biasedLat);
+    let biased_lon = (point.x + 180.0) / 360.0;
+    let biased_lat = (point.y + 90.0) / 180.0;
+    debug_float(biased_lon);
+    debug_float(biased_lat);
 
-    let latBits: u64 = ((biasedLat * mult) as u64) & 0x7fffffff;
-    let lonBits: u64 = ((biasedLon * mult) as u64) & 0x7fffffff;
+    let lat_bits: u64 = ((biased_lat * mult) as u64) & 0x7fffffff;
+    let lon_bits: u64 = ((biased_lon * mult) as u64) & 0x7fffffff;
 
     // println!("{}", mult);
-    println!("{}", lonBits);
-    println!("{}", latBits);
-    println!("{:#066b}", lonBits);
-    println!("{:#066b}", latBits);
+    println!("{}", lon_bits);
+    println!("{}", lat_bits);
+    println!("{:#066b}", lon_bits);
+    println!("{:#066b}", lat_bits);
 
-    let latWide = widen(latBits);
-    let lonWide = widen(lonBits);
-    println!("{:#066b}", lonWide);
-    println!("{:#066b}", latWide);
+    let lat_wide = widen(lat_bits);
+    let lon_wide = widen(lon_bits);
+    println!("{:#066b}", lon_wide);
+    println!("{:#066b}", lat_wide);
 
-    let encoded = lonWide | (latWide >> 1);
+    let encoded = lon_wide | (lat_wide >> 1);
     println!("****************8");
     println!("{:#066b}", encoded);
     encoded
