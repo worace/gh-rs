@@ -85,19 +85,20 @@ use std::collections::VecDeque;
 pub fn to_base_32(mut gh: u64, bits: usize) -> String {
     let mut chars: VecDeque<char> = VecDeque::with_capacity(bits / 5);;
     for i in (0..bits / 5).rev() {
-        println!("~~~~~~~~~~~~~~~~~~~");
-        println!("{}", i);
-        chars.push_front(BASE32_INV[&((gh & 0x1f) as usize)]);
+        let lookup_index = (gh & 0x1f) as usize;
+        println!("{}", lookup_index);
+        let letter = BASE32[lookup_index];
+        chars.push_front(letter);
+        // chars.push_front(BASE32_INV[&((gh & 0x1f) as usize)]);
         gh >>= 5;
     }
-    // for (int i = chars.length - 1; i >= 0; --i) {
-    //     chars[i] = BASE32[(int) (gh & 0x1fl)];
-    //     gh >>= 5;
-    // }
     chars.into_iter().collect()
 }
 
 pub fn encode_base_32(point: Coordinate<f64>, bits: usize) -> String {
+    for (index, char_code) in BASE32_INV_FAST.iter().enumerate() {
+        println!("{} - {}", index, char_code);
+    }
     to_base_32(encode(point, bits), bits)
 }
 
