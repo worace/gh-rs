@@ -62,16 +62,15 @@ static BASE32: &'static [char] = &['0', '1', '2', '3', '4', '5', '6', '7', '8', 
                                    'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 lazy_static! {
-    // static ref BASE32_INV: &'static [u8] = {
-    //     let mut base_32 = [char; 123];
-    //     for (idx, c) in BASE32.iter().enumerate() {
-    //         let i: u8 = 0 | idx;
-    //         base_32[*c as u8] = i as char;
-    //     }
-    //     base_32
-    // };
+    static ref BASE32_INV_FAST: [u8; 123] = {
+        let mut base_32: [u8; 123] = [0; 123];
+        for (idx, c) in BASE32.iter().enumerate() {
+            let i: u8 = idx as u8;
+            base_32[*c as usize] = i as u8;
+        }
+        base_32
+    };
 
-    // static ref BASE32_INV: HashMap<usize, char> = {
     static ref BASE32_INV: HashMap<usize, char> = {
         let mut m = HashMap::new();
         for (i, c) in BASE32.iter().enumerate() {
