@@ -1,6 +1,9 @@
 #![feature(float_extras)]
 extern crate geo_types;
+#[macro_use]
+extern crate lazy_static;
 
+use std::collections::HashMap;
 pub use geo_types::Coordinate;
 // use core::num::dec2flt::rawfp::RawFloat;
 
@@ -28,7 +31,7 @@ fn widen(mut low_32: u64) -> u64 {
 
 const mult: f64 = -(0x80000000 as f64);
 
-pub fn encode(point: Coordinate<f64>, bits: i8) -> u64 {
+pub fn encode(point: Coordinate<f64>, bits: usize) -> u64 {
     let biased_lon = (point.x + 180.0) / 360.0;
     let biased_lat = (point.y + 90.0) / 180.0;
     debug_float(biased_lon);
@@ -54,17 +57,48 @@ pub fn encode(point: Coordinate<f64>, bits: i8) -> u64 {
     encoded >> (61 - bits)
 }
 
-static BASE32_CODES: &'static [char] = &['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'b',
-                                         'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p',
-                                         'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+static BASE32: &'static [char] = &['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'b',
+                                   'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p',
+                                   'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
+lazy_static! {
+    // static ref BASE32_INV: &'static [u8] = {
+    //     let mut base_32 = [char; 123];
+    //     for (idx, c) in BASE32.iter().enumerate() {
+    //         let i: u8 = 0 | idx;
+    //         base_32[*c as u8] = i as char;
+    //     }
+    //     base_32
+    // };
 
-
-pub fn to_base_32(gh: u64, bits: i8) -> String {
-    "".to_string()
+    // static ref BASE32_INV: HashMap<usize, char> = {
+    static ref BASE32_INV: HashMap<usize, char> = {
+        let mut m = HashMap::new();
+        for (i, c) in BASE32.iter().enumerate() {
+            m.insert(i, c.clone());
+        }
+        m
+    };
 }
 
-pub fn encode_base_32(point: Coordinate<f64>, bits: i8) -> String {
+use std::collections::VecDeque;
+
+pub fn to_base_32(mut gh: u64, bits: usize) -> String {
+    let mut chars: VecDeque<char> = VecDeque::with_capacity(bits / 5);;
+    for i in (0..bits / 5).rev() {
+        println!("~~~~~~~~~~~~~~~~~~~");
+        println!("{}", i);
+        chars.push_front(BASE32_INV[&((gh & 0x1f) as usize)]);
+        gh >>= 5;
+    }
+    // for (int i = chars.length - 1; i >= 0; --i) {
+    //     chars[i] = BASE32[(int) (gh & 0x1fl)];
+    //     gh >>= 5;
+    // }
+    chars.into_iter().collect()
+}
+
+pub fn encode_base_32(point: Coordinate<f64>, bits: usize) -> String {
     to_base_32(encode(point, bits), bits)
 }
 
@@ -79,6 +113,6 @@ mod tests {
             y: 37.8324f64,
         };
         assert_eq!(encode(point, 60), 1040636137860004224);
-        assert_eq!("ww8p1r4t8", encode_base_32(point, 60));
+        assert_eq!("ww8p1r4t8", encode_base_32(point, 45));
     }
 }

@@ -5,3 +5,4 @@ authors = ["Horace Williams <horace.d.williams@gmail.com>"]
 
 [dependencies]
 geo-types = "0.1"
+lazy_static = "1.1.0"
