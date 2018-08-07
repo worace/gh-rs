@@ -28,7 +28,7 @@ fn widen(mut low_32: u64) -> u64 {
 
 const mult: f64 = -(0x80000000 as f64);
 
-pub fn encode(point: Coordinate<f64>) -> u64 {
+pub fn encode(point: Coordinate<f64>, bits: i8) -> u64 {
     let biased_lon = (point.x + 180.0) / 360.0;
     let biased_lat = (point.y + 90.0) / 180.0;
     debug_float(biased_lon);
@@ -51,19 +51,34 @@ pub fn encode(point: Coordinate<f64>) -> u64 {
     let encoded = lon_wide | (lat_wide >> 1);
     println!("****************8");
     println!("{:#066b}", encoded);
-    encoded
+    encoded >> (61 - bits)
+}
+
+static BASE32_CODES: &'static [char] = &['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'b',
+                                         'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p',
+                                         'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+
+
+pub fn to_base_32(gh: u64, bits: i8) -> String {
+    "".to_string()
+}
+
+pub fn encode_base_32(point: Coordinate<f64>, bits: i8) -> String {
+    to_base_32(encode(point, bits), bits)
 }
 
 #[cfg(test)]
 mod tests {
     use geo_types::Coordinate;
-    use encode;
+    use {encode, encode_base_32};
     #[test]
     fn encoding() {
         let point = Coordinate {
             x: 112.5584f64,
             y: 37.8324f64,
         };
-        assert_eq!(encode(point), 2081272275720008449);
+        assert_eq!(encode(point, 60), 1040636137860004224);
+        assert_eq!("ww8p1r4t8", encode_base_32(point, 60));
     }
 }
