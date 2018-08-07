@@ -28,8 +28,7 @@ fn widen(mut low_32: u64) -> u64 {
   low_32
 }
 
-
-const mult: f64 = -(0x80000000 as f64);
+const FLOAT_SHIFT: f64 = 0x80000000u32 as f64;
 
 pub fn encode(point: Coordinate<f64>, bits: usize) -> u64 {
     let biased_lon = (point.x + 180.0) / 360.0;
@@ -37,8 +36,8 @@ pub fn encode(point: Coordinate<f64>, bits: usize) -> u64 {
     debug_float(biased_lon);
     debug_float(biased_lat);
 
-    let lat_bits: u64 = ((biased_lat * mult) as u64) & 0x7fffffff;
-    let lon_bits: u64 = ((biased_lon * mult) as u64) & 0x7fffffff;
+    let lat_bits: u64 = ((biased_lat * FLOAT_SHIFT) as u64) & 0x7fffffff;
+    let lon_bits: u64 = ((biased_lon * FLOAT_SHIFT) as u64) & 0x7fffffff;
 
     // println!("{}", mult);
     println!("{}", lon_bits);
