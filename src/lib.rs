@@ -84,14 +84,19 @@ lazy_static! {
 }
 
 pub fn to_base_32(mut gh: u64, bits: usize) -> String {
-    let mut chars: VecDeque<char> = VecDeque::with_capacity(bits / 5);;
-    for _ in (0..bits / 5).rev() {
+    // let mut chars: VecDeque<char> = VecDeque::with_capacity(bits / 5);;
+    let mut chars: [u8; 12] = [0; 12];
+    for i in (0..bits / 5).rev() {
         let lookup_index = (gh & 0x1f) as usize;
         let letter = BASE32[lookup_index];
-        chars.push_front(letter);
+        chars[i] = letter as u8;
         gh >>= 5;
     }
-    chars.into_iter().collect()
+    // chars.into_iter().collect()
+    // String::from_utf8_lossy(&chars[0..bits / 5]).into_owned()
+    let mut vec_of_u8 = vec![];
+    vec_of_u8.extend_from_slice(&chars);
+    String::from_utf8(vec_of_u8).unwrap()
 }
 
 pub fn encode_base_32(point: Coordinate<f64>, bits: usize) -> String {
@@ -181,7 +186,7 @@ mod tests {
             y: 37.8324f64,
         };
         b.iter(|| {
-            for _i in 1..10000 {
+            for _i in 1..1000 {
                 test::black_box(encode(point, 60));
             }
         })
@@ -193,11 +198,38 @@ mod tests {
             x: 112.5584f64,
             y: 37.8324f64,
         };
-        let res = b.iter(|| {
+        b.iter(|| {
             // let n = test::black_box(1000000);
-            for _i in 1..10000 {
+            for _i in 1..1000 {
                 test::black_box(geohash::encode_long(point, 60));
             }
-        });
+        })
+    }
+
+    #[bench]
+    fn bench_gh_rs_encode_string(b: &mut Bencher) {
+        let point = Coordinate {
+            x: 112.5584f64,
+            y: 37.8324f64,
+        };
+        b.iter(|| {
+            for _i in 1..1000 {
+                test::black_box(encode_base_32(point, 60));
+            }
+        })
+    }
+
+    #[bench]
+    fn bench_geohash_encode_string(b: &mut Bencher) {
+        let point = Coordinate {
+            x: 112.5584f64,
+            y: 37.8324f64,
+        };
+        b.iter(|| {
+            // let n = test::black_box(1000000);
+            for _i in 1..1000 {
+                test::black_box(geohash::encode(point, 12));
+            }
+        })
     }
 }
