@@ -181,28 +181,49 @@ mod tests {
 
     #[bench]
     fn bench_gh_rs_encode(b: &mut Bencher) {
-        let point = Coordinate {
+        let p1 = Coordinate {
             x: 112.5584f64,
             y: 37.8324f64,
         };
+        let p2 = Coordinate {
+            x: -118.5584f64,
+            y: 34.8324f64,
+        };
+        let p3 = Coordinate {
+            x: -100.5584f64,
+            y: 22.8324f64,
+        };
         b.iter(|| {
-            for _i in 1..1000 {
-                test::black_box(encode(point, 60));
-            }
+            // for _i in 1..1000 {
+                // assert_eq!(encode(point, 60), 1040636137860004224);
+                test::black_box(encode(p1, 60));
+                test::black_box(encode(p2, 60));
+                test::black_box(encode(p3, 60));
+            // }
         })
     }
 
     #[bench]
     fn bench_geohash_encode(b: &mut Bencher) {
-        let point = Coordinate {
+        let p1 = Coordinate {
             x: 112.5584f64,
             y: 37.8324f64,
         };
+        let p2 = Coordinate {
+            x: -118.5584f64,
+            y: 34.8324f64,
+        };
+        let p3 = Coordinate {
+            x: -100.5584f64,
+            y: 22.8324f64,
+        };
         b.iter(|| {
-            // let n = test::black_box(1000000);
-            for _i in 1..1000 {
-                test::black_box(geohash::encode_long(point, 60));
-            }
+            // for _i in 1..1000 {
+                // assert_eq!(geohash::encode_long(point, 60), 1040636137860004224);
+                test::black_box(geohash::encode_long(p1, 60));
+                test::black_box(geohash::encode_long(p2, 60));
+                test::black_box(geohash::encode_long(p3, 60));
+            // }
         })
     }
 
